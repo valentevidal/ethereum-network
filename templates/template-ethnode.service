@@ -1,0 +1,15 @@
+[Unit]
+Description=Ethereum node
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/myethprivatenet
+ExecStart=/usr/bin/geth --datadir /home/ubuntu/myethprivatenet/mydata --networkid 4224 --nat extip:<Your Public IP> --http --http.addr 0.0.0.0 --http.corsdomain '*' --allow-insecure-unlock --unlock 0xB4eC31aD5720F6b23C9A7b2D83Fe7A9C540b3e7F --password ~/myethprivatenet/password
+Restart=always
+RestartSec=3
+StandardOutput=file:/home/ubuntu/myethprivatenet/geth.log
+StandardError=file:/home/ubuntu/myethprivatenet/geth_error.log
+
+[Install]
+WantedBy=multi-user.target
