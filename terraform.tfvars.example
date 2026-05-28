@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars and fill in.
+# `setup.sh` generates genesis/keystore/service files and writes most of these for you.
+
+ssh_private_key_path = "/path/to/private-key.pem"
+genesis_file_path    = "/path/to/genesis.json"
+password_file_path   = "/path/to/password.txt"
+keystore_file_path   = "/path/to/keystore/"
+keystore_file_name   = "UTC--2023-09-05T...--<address>"
+service_file_path    = "/path/to/ethnode.service"
+
+# Restrict SSH to your own IP in real deployments, e.g. ["203.0.113.4/32"].
+allowed_ssh_cidr = ["0.0.0.0/0"]

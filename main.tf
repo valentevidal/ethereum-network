@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"
+  region  = "eu-west-2"
   profile = "ethereum-network"
 }
 
@@ -13,7 +13,7 @@ output "account_id" {
 }
 
 output "private_key_pem" {
-  value = tls_private_key.eth_ssh_key.private_key_pem
+  value     = tls_private_key.eth_ssh_key.private_key_pem
   sensitive = true
 }
 
@@ -29,8 +29,14 @@ resource "tls_private_key" "eth_ssh_key" {
 
 
 resource "local_file" "private_key" {
-  content  = tls_private_key.eth_ssh_key.private_key_pem
-  filename = "${path.module}/private_key.pem"
+  content         = tls_private_key.eth_ssh_key.private_key_pem
+  filename        = "${path.module}/private_key.pem"
+  file_permission = "0600"
+}
+
+resource "aws_key_pair" "eth_ssh_key" {
+  key_name   = "ethereum-network"
+  public_key = tls_private_key.eth_ssh_key.public_key_openssh
 }
 
 resource "aws_security_group" "ethereum_sg" {
@@ -42,7 +48,7 @@ resource "aws_security_group" "ethereum_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Adjust this to specific IPs or ranges for better security
+    cidr_blocks = var.allowed_ssh_cidr
   }
 
   # Ethereum P2P
@@ -94,16 +100,16 @@ resource "aws_security_group" "ethereum_sg" {
 
 
 resource "aws_instance" "ethereum_node" {
-  ami             = "ami-0eb260c4d5475b901" # This is a standard Ubuntu 22.04 LTS AMI in eu-west-2
+  ami             = "ami-0eb260c4d5475b901" # Ubuntu 22.04 LTS in eu-west-2
   instance_type   = "t2.micro"
-  key_name        = tls_private_key.eth_ssh_key.private_key_pem 
+  key_name        = aws_key_pair.eth_ssh_key.key_name
   security_groups = [aws_security_group.ethereum_sg.name]
 
   tags = {
     Name = "ethereum-network"
   }
 
-    provisioner "remote-exec" {
+  provisioner "remote-exec" {
     inline = [
       "sudo apt-get update",
       "sudo apt-get install -y software-properties-common",
