@@ -48,4 +48,4 @@ genesis.json
 ethnode.service
 keystore/
 password.txt
-private_key.com
+*.pem
